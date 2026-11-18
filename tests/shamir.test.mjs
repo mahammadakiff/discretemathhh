@@ -68,7 +68,7 @@ test('R(5) = 29, U(5) = 99 for n = 7, and the t-table', () => {
   for (let t = 1; t <= 7; t++) assert.equal(S.groupCounts(7, t).R, S.groupCounts(7, 8 - t).U);
 });
 
-test('non-prime modulus 16 raises a clear error', () => {
+test('non-prime modulus 16 is rejected with a clear message', () => {
   assert.throws(() => S.validateModulus(16), S.ShamirError);
   assert.throws(() => S.lagrangeWeights([1, 2, 3, 4, 5], 16), /no inverse modulo 16/);
   assert.throws(() => S.validateModulus(7, 7), /larger than/);
