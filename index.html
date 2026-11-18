@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Four Keyholders Learn Nothing</title>
+  <meta name="description" content="MATH 301 Team 2 project: Shamir secret sharing and the internet's DNSSEC root key. Any 5 of 7 rebuild the key; any 4 learn nothing. Interactive proofs, worked example and a modular-arithmetic lab.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Why Four Keyholders Learn Nothing">
+  <meta property="og:description" content="Shamir secret sharing and the internet's DNSSEC root key. Any 5 of 7 rebuild the key. Any 4 learn nothing.">
+  <meta property="og:image" content="img/og-image.svg">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<header class="nav" id="top">
+  <div class="nav__inner">
+    <a href="#hero" class="brand" aria-label="Back to top">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><use href="#icon-key"/></svg>
+      <span>5 of 7</span>
+    </a>
+    <button class="nav__toggle" aria-expanded="false" aria-controls="nav-links"><span class="sr-only">Menu</span><span></span><span></span></button>
+    <nav aria-label="Sections">
+      <ul id="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#idea">Idea</a></li>
+        <li><a href="#counting">Counting</a></li>
+        <li><a href="#example">Example</a></li>
+        <li><a href="#four">Four learn nothing</a></li>
+        <li><a href="#proof">Proof</a></li>
+        <li><a href="#assumptions">Assumptions</a></li>
+        <li><a href="#lab" class="nav__cta">Lab</a></li>
+        <li><a href="#thanks">Thanks</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+</header>
+
+<!-- SVG sprite: our own icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="icon-key" viewBox="0 0 32 32"><circle cx="11" cy="16" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M17 16h12M24 16v5M28 16v4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="icon-lock" viewBox="0 0 32 32"><rect x="7" y="14" width="18" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M11 14V10a5 5 0 0 1 10 0v4" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+  <symbol id="icon-globe" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 16h22M16 5c4 4 4 18 0 22M16 5c-4 4-4 18 0 22" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="icon-sign" viewBox="0 0 32 32"><path d="M6 24l4-1 13-13-3-3L7 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 28h22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="icon-people" viewBox="0 0 32 32"><circle cx="10" cy="11" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="11" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 25c0-4 3-7 6-7s6 3 6 7M16 25c0-4 3-7 6-7s6 3 6 7" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="icon-box" viewBox="0 0 32 32"><path d="M5 10l11-5 11 5v12l-11 5-11-5z M5 10l11 5 11-5 M16 15v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="hand" viewBox="0 0 600 320" overflow="visible">
+    <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M-400 100 C-200 98 0 104 90 106 C150 108 210 114 268 124"/>
+      <path d="M-400 222 C-200 222 0 216 100 214 C170 212 220 204 270 192"/>
+      <path d="M268 124 C310 128 350 124 392 128 C430 131 470 138 512 146 C534 150 552 152 560 156 C564 159 561 164 553 165 C530 166 500 163 470 162 C452 161 440 161 432 163"/>
+      <path d="M432 163 C452 168 466 176 466 186 C466 196 452 200 438 196 C424 192 414 186 404 184"/>
+      <path d="M404 184 C418 192 424 202 418 209 C410 216 394 212 382 205"/>
+      <path d="M382 205 C390 214 388 222 378 224 C366 226 352 218 340 208"/>
+      <path d="M340 208 C318 202 296 196 270 192"/>
+      <path d="M352 150 C372 158 396 166 416 176 C424 180 424 187 416 188 C400 189 380 184 362 178"/>
+      <path d="M478 141 C482 148 482 156 478 162" opacity=".6"/>
+      <path d="M440 135 C446 145 446 153 442 160" opacity=".55"/>
+    </g>
+    <g fill="none" stroke="var(--teal)" stroke-width="1" opacity=".5" stroke-linecap="round">
+      <path d="M-380 122 C-100 120 100 128 250 144"/><path d="M-380 140 C-100 138 100 144 250 158"/>
+      <path d="M-380 158 C-100 158 100 162 252 172"/><path d="M-380 176 C-100 176 100 178 254 182"/>
+      <path d="M-380 194 C-100 194 100 192 256 188"/>
+      <path d="M300 140 C340 142 380 142 420 146"/><path d="M296 156 C320 160 340 162 350 166"/>
+      <path d="M300 176 C320 180 336 186 350 194"/><path d="M490 152 C510 155 530 157 548 159"/>
+    </g>
+  </symbol>
+</svg>
+
+<main id="main">
+
+<!-- 1. HERO -->
+<section id="hero" class="hero">
+  <div class="wrap hero__grid">
+    <div class="hero__text">
+      <p class="eyebrow">MATH 301 · Discrete Mathematics · Baku Higher Oil School · Team 2</p>
+      <h1 class="hero__title">Why Four Keyholders <span class="accent">Learn Nothing</span></h1>
+      <p class="hero__sub">Shamir secret sharing and the internet's DNSSEC root key</p>
+      <p class="hero__answer"><strong>Any 5 of 7</strong> rebuild the key. <strong>Any 4</strong> learn nothing.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#problem">Start the story</a>
+        <a class="btn btn--ghost" href="#lab">Open the lab</a>
+      </div>
+    </div>
+    <figure class="hero__visual" aria-label="Seven key holders around a lock. When five light up, the lock opens; four are not enough.">
+      <svg id="hero-svg" viewBox="-160 -160 320 320" role="img" aria-hidden="true">
+        <circle r="118" class="ring"/>
+        <g id="hero-links"></g>
+        <g id="hero-lock" class="lock">
+          <circle r="42" class="lock__bg"/>
+          <path id="hero-shackle" d="M-14 -6 V-18 a14 14 0 0 1 28 0 V-6" class="lock__shackle"/>
+          <rect x="-20" y="-6" width="40" height="30" rx="6" class="lock__body"/>
+          <text id="hero-secret" y="15" text-anchor="middle" class="lock__text">?</text>
+        </g>
+        <g id="hero-nodes"></g>
+      </svg>
+      <figcaption id="hero-caption" class="hero__caption" aria-live="polite">Holders meeting: 0 of 7</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 2. PROBLEM -->
+<section id="problem" class="section" data-ghost="DNSSEC">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">01 · The problem</p>
+      <h2>One secret protects the internet's root key backup</h2>
+      <p class="lead">Every DNSSEC signature traces back to a single key. Its backups are locked with another secret that no single person may ever hold.</p>
+    </header>
+    <ol class="chain">
+      <li class="chain__step reveal"><svg aria-hidden="true"><use href="#icon-globe"/></svg><h3>DNS</h3><p>Turns a website name into a numeric address.</p></li>
+      <li class="chain__step reveal"><svg aria-hidden="true"><use href="#icon-sign"/></svg><h3>DNSSEC</h3><p>Signs those answers so they cannot be forged.</p></li>
+      <li class="chain__step reveal"><svg aria-hidden="true"><use href="#icon-key"/></svg><h3>KSK</h3><p>The root zone Key Signing Key, operated by PTI (an ICANN affiliate). Every signature traces back to it.</p></li>
+      <li class="chain__step reveal"><svg aria-hidden="true"><use href="#icon-box"/></svg><h3>SMK</h3><p>The KSK backups are encrypted with the Storage Master Key (sec.&nbsp;5.8).</p></li>
+      <li class="chain__step chain__step--hl reveal"><svg aria-hidden="true"><use href="#icon-people"/></svg><h3>7 holders</h3><p>The SMK is split among 7 Recovery Key Share Holders. <strong class="num">Any 5</strong> can rebuild it (sec.&nbsp;5.5).</p></li>
+    </ol>
+    <div class="grid-3">
+      <div class="card reveal"><h3>The rule</h3><p>“Any one person or organization MUST NOT ever hold the complete SMK.” It is split with a <em>five of seven</em> threshold scheme.</p><p class="src">PTI KSK Key Management Policy v3.6 (2023), sec. 5.5</p></div>
+      <div class="card reveal"><h3>What's missing</h3><p>The policy says neither <em>why</em> 5-of-7 nor <em>which</em> scheme. We model the split with Shamir's (1979) scheme and study only its mathematics.</p></div>
+      <div class="card reveal"><h3>Our three questions</h3><ol class="qs"><li><b>(a)</b> How many groups can rebuild the key, and how many cannot?</li><li><b>(b)</b> How does 5-of-7 balance safety against availability?</li><li><b>(c)</b> Why do any four holders learn <em>nothing</em>?</li></ol></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. IDEA -->
+<section id="idea" class="section" data-ghost="POLYNOMIAL">
+  <div class="wrap two-col">
+    <div class="reveal">
+      <p class="eyebrow">02 · The idea</p>
+      <h2>Hide the secret where a curve crosses the axis</h2>
+      <p class="lead">Two points fix a straight line. One point lies on infinitely many lines, one through <em>every</em> height on the vertical axis.</p>
+      <p>If the secret is the height where the line crosses the axis (<span class="mono">x = 0</span>), one share says nothing and two shares give it exactly. Shamir uses a polynomial of degree at most 4 instead: <strong>five points fix it, four leave the secret completely free.</strong></p>
+      <div class="model card">
+        <p class="mono model__f">f(x) = s + a₁x + a₂x² + a₃x³ + a₄x⁴ (mod p)</p>
+        <ul class="ticks">
+          <li>The secret <span class="mono">s = f(0)</span> is the constant term; <span class="mono">x = 0</span> is never handed out.</li>
+          <li>Holder <span class="mono">i</span> gets the share <span class="mono">(i, f(i))</span>. <span class="mono">p</span> is a prime &gt; 7.</li>
+          <li>Example, p = 17: <span class="mono">f(x) = 11 + 7x + 9x² + 5x³ + 6x⁴</span>, secret <b class="num">11</b>.</li>
+        </ul>
+        <div class="share-row" aria-label="The seven example shares">
+          <span>(1, 4)</span><span>(2, 10)</span><span>(3, 3)</span><span>(4, 16)</span><span>(5, 5)</span><span>(6, 2)</span><span>(7, 13)</span>
+        </div>
+      </div>
+    </div>
+    <div class="idea reveal">
+      <div class="seg" role="group" aria-label="Number of known points">
+        <button class="seg__btn is-on" data-points="1" aria-pressed="true">1 point known</button>
+        <button class="seg__btn" data-points="2" aria-pressed="false">2 points known</button>
+      </div>
+      <svg id="idea-svg" viewBox="0 0 400 320" role="img" aria-label="Lines through known points; the secret is where the line crosses the vertical axis"></svg>
+      <p id="idea-text" class="idea__text" aria-live="polite"></p>
+      <p class="hint">Drag the points to move them.</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="ring7 reveal" id="ring7">
+      <div class="ring7__intro">
+        <p class="eyebrow">The seven shares</p>
+        <h3 class="ring7__title">Bring holders to the table</h3>
+        <p class="muted">Tap the cards to choose who comes to the meeting. The ring turns as you scroll.</p>
+      </div>
+      <div class="ring7__stage">
+        <div class="ring7__center" aria-live="polite">
+          <span class="ring7__count" id="ring-count">0 / 7</span>
+          <span class="ring7__state" id="ring-state">Choose holders</span>
+        </div>
+        <div class="ring7__cards" id="ring-cards" role="group" aria-label="The seven share holders"></div>
+      </div>
+      <div class="ring7__controls">
+        <button class="btn btn--ghost btn--sm" id="ring-prev" aria-label="Turn the ring left">←</button>
+        <button class="btn btn--ghost btn--sm" id="ring-five">Pick 5</button>
+        <button class="btn btn--ghost btn--sm" id="ring-clear">Clear</button>
+        <button class="btn btn--ghost btn--sm" id="ring-next" aria-label="Turn the ring right">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERLUDE: two fingers meet -->
+<section id="spark" class="spark" aria-labelledby="spark-title">
+  <div class="spark__pin">
+    <p class="spark__ghost" aria-hidden="true">FIVE MEET</p>
+    <svg class="spark__svg" id="spark-svg" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Line drawing inspired by The Creation of Adam: two hands reach toward each other from opposite sides and their fingertips meet in the centre.">
+      <defs>
+        <radialGradient id="spark-glow"><stop offset="0" stop-color="#fff7d6"/><stop offset=".35" stop-color="#fbbf24" stop-opacity=".9"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0"/></radialGradient>
+      </defs>
+      <g class="spark__hand spark__hand--l" id="hand-l"><g transform="translate(40 90) rotate(-7 560 160)"><use href="#hand" width="600" height="320"/></g></g>
+      <g class="spark__hand spark__hand--r" id="hand-r"><g transform="translate(1200 90) scale(-1 1) translate(40 0) rotate(7 560 160)"><use href="#hand" width="600" height="320"/>
+        <g fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55" stroke-linecap="round"><path d="M-120 96 C-60 80 0 92 40 88 C80 84 120 100 150 104"/><path d="M-120 230 C-60 240 0 226 60 232 C110 236 140 222 170 212"/><path d="M-60 92 C-40 140 -40 180 -56 234"/><path d="M20 90 C36 140 36 180 24 228"/></g>
+      </g></g>
+      <circle id="spark-dot" cx="600" cy="250" r="70" fill="url(#spark-glow)" opacity="0"/>
+      <circle id="spark-ring" cx="600" cy="250" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0"/>
+    </svg>
+    <div class="spark__text">
+      <p class="eyebrow" id="spark-shares" aria-live="polite">Shares present: 0</p>
+      <h2 id="spark-title" class="spark__title">Almost touching <span class="muted">is not touching.</span></h2>
+      <p class="spark__cap" id="spark-cap">Four shares come close, yet nothing passes between them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. COUNTING -->
+<section id="counting" class="section" data-ghost="128 · 29 · 99">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">03 · Questions (a) and (b)</p>
+      <h2>Counting the groups, and the price of safety</h2>
+    </header>
+    <div class="stats">
+      <div class="stat reveal"><span class="stat__num" data-count="128">0</span><span class="stat__label">possible groups, 2<sup>7</sup></span></div>
+      <div class="stat stat--good reveal"><span class="stat__num" data-count="29">0</span><span class="stat__label">can rebuild: 21 + 7 + 1</span></div>
+      <div class="stat stat--bad reveal"><span class="stat__num" data-count="99">0</span><span class="stat__label">cannot: 1 + 7 + 21 + 35 + 35</span></div>
+    </div>
+    <div class="two-col two-col--top">
+      <div class="card reveal">
+        <h3>Every one of the 128 groups</h3>
+        <p class="muted">Each dot is a group, sorted by size. Lit dots have at least 5 members.</p>
+        <div id="dots" class="dots" aria-hidden="true"></div>
+        <p class="formula">C(7,5) + C(7,6) + C(7,7) = 21 + 7 + 1 = <b class="num">29</b></p>
+        <p><b>Complement view:</b> a rebuilding group is fixed by naming who stays away: nobody (1), one holder (7) or two holders (21), giving 1 + 7 + 21 = 29. In general <span class="mono">R(t) = U(8 − t)</span>.</p>
+      </div>
+      <div class="card reveal">
+        <h3>Try another threshold</h3>
+        <label class="slider">
+          <span>Threshold <b id="t-val" class="num">t = 5</b></span>
+          <input id="t-slider" type="range" min="3" max="7" step="1" value="5" aria-describedby="t-note">
+        </label>
+        <div class="kv">
+          <div><span class="kv__k">Safety (needed to steal)</span><span id="t-safety" class="kv__v">5</span></div>
+          <div><span class="kv__k">Availability (may be missing)</span><span id="t-avail" class="kv__v">2</span></div>
+          <div><span class="kv__k">Groups that can rebuild</span><span id="t-r" class="kv__v good">29</span></div>
+          <div><span class="kv__k">Groups that cannot</span><span id="t-u" class="kv__v bad">99</span></div>
+        </div>
+        <div id="t-bars" class="bars" role="img" aria-label="Number of groups of each size, coloured by whether they can rebuild"></div>
+        <p id="t-note" class="note"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. WORKED EXAMPLE -->
+<section id="example" class="section" data-ghost="249 ≡ 11">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">04 · Worked example</p>
+      <h2>Holders 2, 3, 5, 6 and 7 rebuild s = 11</h2>
+      <p class="lead">Lagrange interpolation at <span class="mono">x = 0</span>: <span class="mono">s = Σ w<sub>j</sub>·y<sub>j</sub></span>, with <span class="mono">w<sub>j</sub> = Π<sub>m≠j</sub> x<sub>m</sub> / (x<sub>m</sub> − x<sub>j</sub>)</span> mod 17. Each division is a multiplication by an inverse.</p>
+    </header>
+    <div class="card reveal">
+      <div class="table-scroll">
+        <table class="steps" id="ex-table">
+          <caption class="sr-only">Weights and recovery for holders 2, 3, 5, 6 and 7, all arithmetic modulo 17</caption>
+          <thead><tr><th scope="col">x<sub>j</sub></th><th scope="col">Numerator Π x<sub>m</sub></th><th scope="col">Denominator Π (x<sub>m</sub> − x<sub>j</sub>)</th><th scope="col">Inverse</th><th scope="col">Weight w<sub>j</sub></th><th scope="col">y<sub>j</sub></th><th scope="col">w<sub>j</sub>y<sub>j</sub></th></tr></thead>
+          <tbody>
+            <tr><td>2</td><td>3·5·6·7 = 630 ≡ 1</td><td>1·3·4·5 = 60 ≡ 9</td><td>2 (9·2 ≡ 1)</td><td>1·2 = <b>2</b></td><td>10</td><td>20</td></tr>
+            <tr><td>3</td><td>2·5·6·7 = 420 ≡ 12</td><td>(−1)·2·3·4 = −24 ≡ 10</td><td>12 (10·12 ≡ 1)</td><td>12·12 ≡ <b>8</b></td><td>3</td><td>24</td></tr>
+            <tr><td>5</td><td>2·3·6·7 = 252 ≡ 14</td><td>(−3)(−2)·1·2 = 12</td><td>10 (12·10 ≡ 1)</td><td>14·10 ≡ <b>4</b></td><td>5</td><td>20</td></tr>
+            <tr><td>6</td><td>2·3·5·7 = 210 ≡ 6</td><td>(−4)(−3)(−1)·1 = −12 ≡ 5</td><td>7 (5·7 ≡ 1)</td><td>6·7 ≡ <b>8</b></td><td>2</td><td>16</td></tr>
+            <tr><td>7</td><td>2·3·5·6 = 180 ≡ 10</td><td>(−5)(−4)(−2)(−1) = 40 ≡ 6</td><td>3 (6·3 ≡ 1)</td><td>10·3 ≡ <b>13</b></td><td>13</td><td>169</td></tr>
+          </tbody>
+          <tfoot><tr><th scope="row">Sum</th><td></td><td></td><td></td><td>35 ≡ 1</td><td></td><td>249</td></tr></tfoot>
+        </table>
+      </div>
+      <div class="ex-result" id="ex-result" aria-live="polite">
+        <p class="mono">2·10 + 8·3 + 4·5 + 8·2 + 13·13 = 249 = 14·17 + 11 ≡ <b class="big num">11</b></p>
+        <p class="muted">The weights add up to 35 ≡ 1, as they must: shares that are all 1 come from the constant polynomial 1.</p>
+      </div>
+      <div class="ex-controls">
+        <button class="btn btn--primary" id="ex-next">Next step</button>
+        <button class="btn btn--ghost" id="ex-reset">Reset</button>
+        <span id="ex-status" class="muted" aria-live="polite"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. FOUR LEARN NOTHING -->
+<section id="four" class="section" data-ghost="SEVENTEEN">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">05 · Question (c)</p>
+      <h2>Four holders, seventeen equally good answers</h2>
+      <p class="lead">Holders 1–4 see (1, 4), (2, 10), (3, 3), (4, 16). For <em>every</em> guess <span class="mono">g = 0…16</span> exactly one polynomial of degree at most 4 fits: <span class="mono">h<sub>g</sub> = h<sub>0</sub> + g·L<sub>0</sub></span>.</p>
+    </header>
+    <div class="two-col two-col--top">
+      <div class="card reveal">
+        <svg id="fan-svg" viewBox="0 0 520 360" role="img" aria-label="All 17 polynomials evaluated modulo 17 at x = 0 to 7. They meet at the four shares for x = 1 to 4 and take all 17 values at x = 0."></svg>
+        <label class="slider">
+          <span>Highlight guess <b id="g-val" class="num">g = 11</b></span>
+          <input id="g-slider" type="range" min="0" max="16" value="11">
+        </label>
+        <p class="muted small">Values are computed on the 17-hour clock, so each curve is drawn through its values at x = 0, 1, …, 7. All 17 meet at the four shares; at x = 0 they take every value.</p>
+      </div>
+      <div class="card reveal">
+        <p class="mono small">h<sub>0</sub> = 3x + 5x² + 11x³ + 2x⁴ &nbsp;·&nbsp; L<sub>0</sub> = 1 + 5x + 5x² + x³ + 5x⁴</p>
+        <div class="poly-list" id="poly-list" role="list"></div>
+        <p class="small"><span class="tag tag--amber">g = 11</span> is the dealer's real f, yet the four holders cannot tell it apart from the other sixteen. <span class="tag tag--teal">g = 3</span> gives a₄ = 0, the case where “degree <em>at most</em> 4” matters.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. PROOF -->
+<section id="proof" class="section" data-ghost="PERFECT SECRECY">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">06 · The proof</p>
+      <h2>Three steps to perfect secrecy</h2>
+    </header>
+    <div class="grid-3">
+      <article class="card proof reveal">
+        <span class="proof__n">1</span>
+        <h3>Lagrange + root lemma</h3>
+        <p>Through any five points with different x-values there is <b>exactly one</b> polynomial of degree at most 4.</p>
+        <div class="tex" data-tex="\begin{gathered}L_j(x)=\prod_{m\ne j}\frac{x-x_m}{x_j-x_m}\\[4pt] P(x)=\sum_{j=1}^{5} y_j L_j(x)\end{gathered}"></div>
+        <p class="small"><b>Lemma (induction on d):</b> mod a prime, a nonzero polynomial of degree ≤ d has at most d roots. Write <span class="tex-i" data-tex="q(x)=(x-r)\,q_1(x)">q(x) = (x − r)q₁(x)</span>; for another root r′, Euclid's lemma gives <span class="tex-i" data-tex="q_1(r')\equiv 0">q₁(r′) ≡ 0</span>. Two fitting polynomials would differ by one with five roots: impossible.</p>
+      </article>
+      <article class="card proof reveal">
+        <span class="proof__n">2</span>
+        <h3>One-to-one counting</h3>
+        <p>Fix k ≤ 4 shares and a guess g. Choose values at 4 − k other holders: each choice plus (0, g) gives five points and, by Step 1, exactly one polynomial.</p>
+        <div class="tex" data-tex="N_B(g,v)=p^{\,4-k}\quad\text{for every guess } g"></div>
+        <p class="small">For k = 4 that is exactly one polynomial per guess: the 17 curves above.</p>
+      </article>
+      <article class="card proof reveal">
+        <span class="proof__n">3</span>
+        <h3>Bayes' theorem</h3>
+        <p>With uniform random coefficients (A2), every guess makes the observed shares equally likely: <span class="tex-i" data-tex="P(v\mid g)=p^{-k}">P(v | g) = p^−k</span>.</p>
+        <div class="tex" data-tex="P(g\mid v)=\frac{P(v\mid g)\,P(g)}{\sum_h P(v\mid h)\,P(h)}=P(g)"></div>
+        <p class="small"><b>Perfect secrecy:</b> the odds of every secret are exactly what they were before. No computing power helps, because the information is not there.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 8. ASSUMPTIONS -->
+<section id="assumptions" class="section" data-ghost="A1 A2 A3 A4 A5">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">07 · Assumptions &amp; what breaks</p>
+      <h2>Each assumption is load-bearing</h2>
+      <p class="lead">Open a card to see what goes wrong without it. Our Python script tested every case.</p>
+    </header>
+    <div class="acc">
+      <details class="acc__item reveal"><summary><span class="acc__id">A1</span> p is a prime larger than 7</summary>
+        <div><p>Prime: every nonzero number has an inverse, so we can divide. Larger than 7: the holder numbers 1–7 stay different and nonzero.</p>
+        <ul><li><b>Modulus 16:</b> recovery fails for <b class="num">all 21</b> groups of five (missing inverses); for <b class="num">7</b> groups the shares fit two different secrets.</li>
+        <li><b>p = 7:</b> holder 7 gets x = 7 ≡ 0, so their share <em>is</em> the secret.</li></ul></div></details>
+      <details class="acc__item acc__item--key reveal"><summary><span class="acc__id">A2</span> Honest dealer, uniformly random coefficients <span class="tag tag--amber">key assumption</span></summary>
+        <div><p>a₁…a₄ are independent and uniform in Z<sub>p</sub>, used once and kept by no one. Step 3 of the proof uses this directly.</p>
+        <ul><li><b>All coefficients = s:</b> one share reveals s = y<sub>i</sub> / (1 + i + i² + i³ + i⁴).</li>
+        <li><b>Dealer forbids a₄ = 0:</b> four holders can rule out one guess (g = 3 in our example), so the odds become 1/16 instead of 1/17.</li></ul></div></details>
+      <details class="acc__item reveal"><summary><span class="acc__id">A3</span> Holder i gets x = i: never 0, all distinct</summary>
+        <div><p>f(0) = s, so x = 0 must never be handed out. If two holders both got x = 3, recovery would divide by zero.</p></div></details>
+      <details class="acc__item reveal"><summary><span class="acc__id">A4</span> Every share handed in is correct</summary>
+        <div><ul><li><b>5 present:</b> one wrong share gives a wrong secret, and nobody notices.</li>
+        <li><b>6 present:</b> the six groups of five never all agree, so the cheat is detected.</li>
+        <li><b>7 present:</b> the true secret is the most common answer (<b class="num">6 of 21</b> groups).</li></ul></div></details>
+      <details class="acc__item reveal"><summary><span class="acc__id">A5</span> The attacker knows everything except the coefficients</summary>
+        <div><p>p, the method, the x-values and up to four shares are public, and computing power is unlimited. Nothing is assumed about how the secret was chosen. The proof still holds.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- 9. LAB -->
+<section id="lab" class="section" data-ghost="THE LAB">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">08 · Interactive lab</p>
+      <h2>Split, rebuild and break it yourself</h2>
+      <p class="lead">Exact modular arithmetic with BigInt in your browser, with no rounding. It works for p = 17 and for p = 2<sup>521</sup> − 1.</p>
+    </header>
+    <div class="lab card">
+      <div class="tabs" role="tablist" aria-label="Lab tools">
+        <button role="tab" id="tab-split" aria-controls="panel-split" aria-selected="true">Split a secret</button>
+        <button role="tab" id="tab-rebuild" aria-controls="panel-rebuild" aria-selected="false" tabindex="-1">Rebuild</button>
+        <button role="tab" id="tab-count" aria-controls="panel-count" aria-selected="false" tabindex="-1">Group counter</button>
+        <button role="tab" id="tab-inv" aria-controls="panel-inv" aria-selected="false" tabindex="-1">Inverse finder</button>
+        <button role="tab" id="tab-break" aria-controls="panel-break" aria-selected="false" tabindex="-1">Break an assumption</button>
+      </div>
+
+      <div role="tabpanel" id="panel-split" aria-labelledby="tab-split" class="panel">
+        <form id="split-form" class="form-grid" novalidate>
+          <label>Prime p<input id="in-p" inputmode="numeric" value="17" autocomplete="off"></label>
+          <label>Holders n<input id="in-n" type="number" min="2" max="20" value="7"></label>
+          <label>Threshold t<input id="in-t" type="number" min="1" max="20" value="5"></label>
+          <label>Secret s<input id="in-s" inputmode="numeric" value="11" autocomplete="off"></label>
+        </form>
+        <div class="btn-row">
+          <button class="btn btn--primary" id="btn-random">Random coefficients</button>
+          <button class="btn btn--ghost" id="btn-example">Use example (11, 7, 9, 5, 6)</button>
+          <button class="btn btn--ghost" id="btn-real">Real size: p = 2<sup>521</sup> − 1</button>
+        </div>
+        <p id="split-error" class="error" role="alert"></p>
+        <div id="split-out" aria-live="polite"></div>
+      </div>
+
+      <div role="tabpanel" id="panel-rebuild" aria-labelledby="tab-rebuild" class="panel" hidden>
+        <p class="muted">Select any shares from the current split (see “Split a secret”). With at least t shares you get the step-by-step recovery; with fewer, you see what remains possible.</p>
+        <div id="rebuild-cards" class="share-cards share-cards--pick"></div>
+        <div class="btn-row"><button class="btn btn--ghost btn--sm" id="pick-all">Select all</button><button class="btn btn--ghost btn--sm" id="pick-none">Clear</button></div>
+        <div id="rebuild-out" aria-live="polite"></div>
+      </div>
+
+      <div role="tabpanel" id="panel-count" aria-labelledby="tab-count" class="panel" hidden>
+        <div class="form-grid form-grid--2">
+          <label>Holders n<input id="c-n" type="number" min="1" max="40" value="7"></label>
+          <label>Threshold t<input id="c-t" type="number" min="1" max="40" value="5"></label>
+        </div>
+        <p id="count-error" class="error" role="alert"></p>
+        <div id="count-out" aria-live="polite"></div>
+      </div>
+
+      <div role="tabpanel" id="panel-inv" aria-labelledby="tab-inv" class="panel" hidden>
+        <div class="form-grid form-grid--2">
+          <label>Number a<input id="i-a" inputmode="numeric" value="9"></label>
+          <label>Modulus p<input id="i-p" inputmode="numeric" value="17"></label>
+        </div>
+        <div id="inv-out" aria-live="polite"></div>
+      </div>
+
+      <div role="tabpanel" id="panel-break" aria-labelledby="tab-break" class="panel" hidden>
+        <p class="muted">Uses the example f(x) = 11 + 7x + 9x² + 5x³ + 6x⁴ with 7 holders, threshold 5.</p>
+        <div class="break-grid">
+          <button class="break-btn" data-break="mod16" aria-pressed="false"><b>Non-prime modulus</b><span>Use 16 instead of 17 (A1)</span></button>
+          <button class="break-btn" data-break="p7" aria-pressed="false"><b>Prime too small</b><span>p = 7 (A1)</span></button>
+          <button class="break-btn" data-break="pattern" aria-pressed="false"><b>Patterned dealer</b><span>Every coefficient = s (A2)</span></button>
+          <button class="break-btn" data-break="noa4" aria-pressed="false"><b>Dealer forbids a₄ = 0</b><span>(A2)</span></button>
+          <button class="break-btn" data-break="wrong" aria-pressed="false"><b>A wrong share</b><span>Holder lies (A4)</span></button>
+        </div>
+        <div id="break-controls"></div>
+        <div id="break-out" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. VERIFICATION / RECOMMENDATION / REFS / TEAM -->
+<section id="verify" class="section" data-ghost="1,419,857">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="eyebrow">09 · Verification</p>
+      <h2>Every claim checked twice</h2>
+    </header>
+    <div class="grid-4">
+      <div class="card stat-card reveal"><span class="stat-card__num num" data-count="1419857">0</span><p>polynomials, all 17<sup>5</sup>, brute-forced with no formula, for all 99 groups of 0–4 holders</p></div>
+      <div class="card stat-card reveal"><span class="stat-card__num num">Bayes</span><p>checked with a deliberately uneven prior: posterior = prior in every case</p></div>
+      <div class="card stat-card reveal"><span class="stat-card__num num" data-count="1000">0</span><p>random examples: all 29 rebuilding groups recovered the secret every time</p></div>
+      <div class="card stat-card reveal"><span class="stat-card__num num">2<sup>521</sup>−1</span><p>real size: a 256-bit secret rebuilt by every group of five (prime by Lucas–Lehmer)</p></div>
+    </div>
+
+    <div class="reco card reveal">
+      <p class="eyebrow">Recommendation</p>
+      <ol class="reco__list">
+        <li><b>Keep 5-of-7.</b> It survives two missing holders, and a thief needs five shares.</li>
+        <li><b>Use a strong random generator</b> for the dealer's coefficients, because the whole safety argument rests on A2.</li>
+        <li><b>Bring six holders</b> to a recovery ceremony, so a wrong share is noticed.</li>
+      </ol>
+    </div>
+
+    <div class="two-col two-col--top">
+      <div class="reveal" id="references">
+        <h2 class="h3">References</h2>
+        <ul class="refs">
+          <li>Public Technical Identifiers. (2023, October 12). <i>Root zone KSK operator key management policy</i> (Version 3.6). Internet Assigned Numbers Authority. <a href="https://www.iana.org/dnssec/procedures/ksk-operator/KSK_Key_Management_Policy_v3.6.pdf" rel="noopener">iana.org</a></li>
+          <li>Rosen, K. H. (2019). <i>Discrete mathematics and its applications</i> (8th ed.). McGraw-Hill Education.</li>
+          <li>Shamir, A. (1979). How to share a secret. <i>Communications of the ACM, 22</i>(11), 612–613. <a href="https://doi.org/10.1145/359168.359176" rel="noopener">doi.org/10.1145/359168.359176</a></li>
+        </ul>
+      </div>
+      <div class="reveal" id="team">
+        <h2 class="h3">Team 2</h2>
+        <ul class="team">
+          <li><span class="avatar" aria-hidden="true">NH</span>Nurtaj Heydarli</li>
+          <li><span class="avatar" aria-hidden="true">FA</span>Farida Aliyeva</li>
+          <li><span class="avatar" aria-hidden="true">NM</span>Nazrin Miriyeva</li>
+          <li><span class="avatar" aria-hidden="true">RA</span>Rabiya Alizada</li>
+          <li><span class="avatar" aria-hidden="true">MG</span>Mahammad Gulmammadov</li>
+        </ul>
+        <p class="muted">MATH 301 Discrete Mathematics · Lecturer: Samra Aghayeva · Baku Higher Oil School · Fall 2026/27</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. THANK YOU -->
+<section id="thanks" class="thanks" aria-labelledby="thanks-title">
+  <div class="thanks__pin">
+    <h2 id="thanks-title" class="sr-only">Thank you</h2>
+    <p class="thanks__w thanks__w--l" aria-hidden="true">Thank</p>
+    <figure class="thanks__card">
+      <div class="thanks__beam" aria-hidden="true"></div>
+      <img src="img/thank-you.webp" width="600" height="400" loading="lazy" decoding="async" alt="A man in a tuxedo smiles and raises a glass in a toast while fireworks burst behind him.">
+    </figure>
+    <p class="thanks__w thanks__w--r" aria-hidden="true">You</p>
+    <p class="thanks__sub">Questions? <span class="muted">Team 2 · MATH 301 · Baku Higher Oil School</span></p>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <p>© 2026 Team 2 · MATH 301 · Baku Higher Oil School</p>
+    <p class="muted small">All examples were generated by us; no real ICANN or PTI data is used. Illustrations are our own.</p>
+    <a href="#hero" class="btn btn--ghost btn--sm">Back to top ↑</a>
+  </div>
+</footer>
+
+<script src="vendor/gsap.min.js" defer></script>
+<script src="vendor/ScrollTrigger.min.js" defer></script>
+<script src="vendor/ScrambleTextPlugin.min.js" defer></script>
+<script src="vendor/lenis.min.js" defer></script>
+<script src="vendor/katex/katex.min.js" defer></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

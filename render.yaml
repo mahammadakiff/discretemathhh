@@ -1,0 +1,15 @@
+# Render Blueprint: free static site, no server needed.
+services:
+  - type: web
+    name: discretemathhh
+    runtime: static
+    buildCommand: npm test
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /vendor/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
