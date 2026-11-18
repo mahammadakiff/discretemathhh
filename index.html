@@ -54,27 +54,6 @@
   <symbol id="icon-sign" viewBox="0 0 32 32"><path d="M6 24l4-1 13-13-3-3L7 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 28h22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="icon-people" viewBox="0 0 32 32"><circle cx="10" cy="11" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="11" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 25c0-4 3-7 6-7s6 3 6 7M16 25c0-4 3-7 6-7s6 3 6 7" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   <symbol id="icon-box" viewBox="0 0 32 32"><path d="M5 10l11-5 11 5v12l-11 5-11-5z M5 10l11 5 11-5 M16 15v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-  <symbol id="hand" viewBox="0 0 600 320" overflow="visible">
-    <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M-400 100 C-200 98 0 104 90 106 C150 108 210 114 268 124"/>
-      <path d="M-400 222 C-200 222 0 216 100 214 C170 212 220 204 270 192"/>
-      <path d="M268 124 C310 128 350 124 392 128 C430 131 470 138 512 146 C534 150 552 152 560 156 C564 159 561 164 553 165 C530 166 500 163 470 162 C452 161 440 161 432 163"/>
-      <path d="M432 163 C452 168 466 176 466 186 C466 196 452 200 438 196 C424 192 414 186 404 184"/>
-      <path d="M404 184 C418 192 424 202 418 209 C410 216 394 212 382 205"/>
-      <path d="M382 205 C390 214 388 222 378 224 C366 226 352 218 340 208"/>
-      <path d="M340 208 C318 202 296 196 270 192"/>
-      <path d="M352 150 C372 158 396 166 416 176 C424 180 424 187 416 188 C400 189 380 184 362 178"/>
-      <path d="M478 141 C482 148 482 156 478 162" opacity=".6"/>
-      <path d="M440 135 C446 145 446 153 442 160" opacity=".55"/>
-    </g>
-    <g fill="none" stroke="var(--teal)" stroke-width="1" opacity=".5" stroke-linecap="round">
-      <path d="M-380 122 C-100 120 100 128 250 144"/><path d="M-380 140 C-100 138 100 144 250 158"/>
-      <path d="M-380 158 C-100 158 100 162 252 172"/><path d="M-380 176 C-100 176 100 178 254 182"/>
-      <path d="M-380 194 C-100 194 100 192 256 188"/>
-      <path d="M300 140 C340 142 380 142 420 146"/><path d="M296 156 C320 160 340 162 350 166"/>
-      <path d="M300 176 C320 180 336 186 350 194"/><path d="M490 152 C510 155 530 157 548 159"/>
-    </g>
-  </symbol>
 </svg>
 
 <main id="main">
@@ -190,16 +169,14 @@
 <section id="spark" class="spark" aria-labelledby="spark-title">
   <div class="spark__pin">
     <p class="spark__ghost" aria-hidden="true">FIVE MEET</p>
-    <svg class="spark__svg" id="spark-svg" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Line drawing inspired by The Creation of Adam: two hands reach toward each other from opposite sides and their fingertips meet in the centre.">
+    <svg class="spark__svg" id="spark-svg" viewBox="0 0 1328 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="The hands from Michelangelo's Creation of Adam reach toward each other from opposite sides, and their fingertips meet in the centre.">
       <defs>
         <radialGradient id="spark-glow"><stop offset="0" stop-color="#fff7d6"/><stop offset=".35" stop-color="#fbbf24" stop-opacity=".9"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0"/></radialGradient>
       </defs>
-      <g class="spark__hand spark__hand--l" id="hand-l"><g transform="translate(40 90) rotate(-7 560 160)"><use href="#hand" width="600" height="320"/></g></g>
-      <g class="spark__hand spark__hand--r" id="hand-r"><g transform="translate(1200 90) scale(-1 1) translate(40 0) rotate(7 560 160)"><use href="#hand" width="600" height="320"/>
-        <g fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55" stroke-linecap="round"><path d="M-120 96 C-60 80 0 92 40 88 C80 84 120 100 150 104"/><path d="M-120 230 C-60 240 0 226 60 232 C110 236 140 222 170 212"/><path d="M-60 92 C-40 140 -40 180 -56 234"/><path d="M20 90 C36 140 36 180 24 228"/></g>
-      </g></g>
-      <circle id="spark-dot" cx="600" cy="250" r="70" fill="url(#spark-glow)" opacity="0"/>
-      <circle id="spark-ring" cx="600" cy="250" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0"/>
+      <g class="spark__hand" id="hand-l"><image href="img/hand-left.webp" x="0" y="0" width="668" height="360"/></g>
+      <g class="spark__hand" id="hand-r"><image href="img/hand-right.webp" x="668" y="0" width="660" height="360"/></g>
+      <circle id="spark-dot" cx="666" cy="183" r="70" fill="url(#spark-glow)" opacity="0"/>
+      <circle id="spark-ring" cx="666" cy="183" r="20" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0"/>
     </svg>
     <div class="spark__text">
       <p class="eyebrow" id="spark-shares" aria-live="polite">Shares present: 0</p>
@@ -499,7 +476,10 @@
     <p class="thanks__w thanks__w--l" aria-hidden="true">Thank</p>
     <figure class="thanks__card">
       <div class="thanks__beam" aria-hidden="true"></div>
-      <img src="img/thank-you.webp" width="600" height="400" loading="lazy" decoding="async" alt="A man in a tuxedo smiles and raises a glass in a toast while fireworks burst behind him.">
+      <!-- To show a real animated GIF: upload it as img/thank-you.gif and set data-gif="img/thank-you.gif" -->
+      <img src="img/thank-you.webp" data-gif="" width="600" height="400" loading="lazy" decoding="async" alt="A man in a tuxedo smiles and raises a glass in a toast while fireworks burst behind him.">
+      <canvas class="thanks__fx" aria-hidden="true"></canvas>
+      <div class="thanks__shine" aria-hidden="true"></div>
     </figure>
     <p class="thanks__w thanks__w--r" aria-hidden="true">You</p>
     <p class="thanks__sub">Questions? <span class="muted">Team 2 · MATH 301 · Baku Higher Oil School</span></p>

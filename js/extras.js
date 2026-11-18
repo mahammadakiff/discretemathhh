@@ -105,7 +105,7 @@ function initSpark() {
   const svg = $('#spark-svg'), L = $('#hand-l'), R = $('#hand-r');
   const dot = $('#spark-dot'), ring = $('#spark-ring');
   const sharesEl = $('#spark-shares'), title = $('#spark-title'), cap = $('#spark-cap');
-  const setView = () => svg.setAttribute('viewBox', innerWidth < 700 ? '330 110 540 280' : '0 0 1200 500');
+  const setView = () => svg.setAttribute('viewBox', innerWidth < 700 ? '396 50 540 280' : '0 0 1328 360');
   setView();
   addEventListener('resize', setView);
 
@@ -127,8 +127,8 @@ function initSpark() {
     texts(5);
     return;
   }
-  gsap.set(L, { x: -720 });
-  gsap.set(R, { x: 720 });
+  gsap.set(L, { x: -820 });
+  gsap.set(R, { x: 820 });
   let last = -1;
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
@@ -142,10 +142,11 @@ function initSpark() {
       },
     },
   });
-  tl.to(L, { x: -16, duration: 0.7, ease: 'power2.out' }, 0)
-    .to(R, { x: 16, duration: 0.7, ease: 'power2.out' }, 0)
+  tl.to(L, { x: -14, duration: 0.7, ease: 'power2.out' }, 0)
+    .to(R, { x: 14, duration: 0.7, ease: 'power2.out' }, 0)
     .to({}, { duration: 0.18 })
-    .to([L, R], { x: 0, duration: 0.06, ease: 'power1.in' })
+    .to(L, { x: 8, duration: 0.06, ease: 'power1.in' })
+    .to(R, { x: -9, duration: 0.06, ease: 'power1.in' }, '<')
     .fromTo(dot, { attr: { opacity: 0, r: 10 } }, { attr: { opacity: 1, r: 90 }, duration: 0.08, ease: 'power2.out' }, '>-0.01')
     .fromTo(ring, { attr: { opacity: 0.9, r: 10 } }, { attr: { opacity: 0, r: 260 }, duration: 0.1, ease: 'power2.out' }, '<');
   texts(0);
@@ -174,7 +175,50 @@ function initThanks() {
     .fromTo(sub, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, 0.6);
 }
 
+/* ---------- Thank-you card: real GIF if provided, otherwise GIF-like motion ---------- */
+function initThanksCard() {
+  const card = $('.thanks__card'), img = $('img', card), cv = $('.thanks__fx', card);
+  if (img.dataset.gif) { img.src = img.dataset.gif; card.classList.add('is-gif'); return; }
+  if (reduced) return;
+  card.classList.add('is-live');
+  const ctx = cv.getContext('2d');
+  let w = 0, h = 0, raf = 0, on = false;
+  const sparks = [], bursts = [];
+  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); w = cv.clientWidth; h = cv.clientHeight; cv.width = w * d; cv.height = h * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+  for (let i = 0; i < 26; i++) sparks.push({ x: Math.random(), y: Math.random() * 0.75, r: 1 + Math.random() * 2.6, ph: Math.random() * 6.28, sp: 0.6 + Math.random() * 1.6 });
+  const burst = () => {
+    const side = Math.random() < 0.5 ? 0.12 + Math.random() * 0.2 : 0.68 + Math.random() * 0.2;
+    const cx = side * w, cy = (0.12 + Math.random() * 0.3) * h, n = 26, hue = [45, 185, 30, 200][Math.floor(Math.random() * 4)];
+    for (let i = 0; i < n; i++) { const a = (i / n) * 6.283, v = 0.8 + Math.random() * 1.4; bursts.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, hue }); }
+  };
+  let t = 0, next = 30;
+  const frame = () => {
+    t++;
+    ctx.clearRect(0, 0, w, h);
+    for (const s of sparks) {
+      const a = 0.25 + 0.75 * Math.max(0, Math.sin(s.ph + t * 0.04 * s.sp));
+      const g = ctx.createRadialGradient(s.x * w, s.y * h, 0, s.x * w, s.y * h, s.r * 4);
+      g.addColorStop(0, `rgba(255,236,200,${a})`); g.addColorStop(1, 'rgba(255,236,200,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x * w, s.y * h, s.r * 4, 0, 6.283); ctx.fill();
+    }
+    if (--next <= 0) { burst(); next = 50 + Math.random() * 70; }
+    for (let i = bursts.length - 1; i >= 0; i--) {
+      const p = bursts[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.vx *= 0.985; p.vy *= 0.985; p.life -= 0.013;
+      if (p.life <= 0) { bursts.splice(i, 1); continue; }
+      ctx.fillStyle = `hsla(${p.hue},90%,70%,${p.life})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, 6.283); ctx.fill();
+    }
+    raf = requestAnimationFrame(frame);
+  };
+  const run = (v) => { if (v && !on) { on = true; size(); raf = requestAnimationFrame(frame); } else if (!v && on) { on = false; cancelAnimationFrame(raf); } };
+  new IntersectionObserver(([e]) => run(e.isIntersecting && !document.hidden)).observe(card);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) run(false); });
+  addEventListener('resize', () => on && size());
+}
+
 export function initExtras() {
+  initThanksCard();
   initGhosts();
   initRing();
   initSpark();
